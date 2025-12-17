@@ -1,5 +1,6 @@
 package org.yearup.data.mysql;
 
+import org.apache.ibatis.jdbc.SQL;
 import org.springframework.stereotype.Component;
 import org.yearup.data.CategoryDao;
 import org.yearup.models.Category;
@@ -61,6 +62,42 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
     public Category getById(int categoryId)
     {
         // get category by id
+        //arrayList is not needed for this method because categoryId is a primary key with 0 or 1 value
+        String sql = """
+                SELECT
+                    category_id,
+                    name,
+                    description
+                FROM
+                    categories
+                WHERE
+                    category_id = ?
+                """;
+        try(Connection connection = getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql);)
+        {
+            statement.setInt(1,categoryId);
+
+            try (ResultSet results = statement.executeQuery())
+            {
+                if (results.next()){
+                    //create a new category object
+                    Category category = new Category();
+                    //set the categories id
+                    category.setCategoryId(results.getInt("category_id"));
+                    //set the categories name
+                    category.setName(results.getString("name"));
+                    //set the categories description
+                    category.setDescription(results.getString("description"));
+
+                    return category;
+
+                }
+            }
+        }catch(SQLException e ){
+            System.out.println("There was an error retrieving the data");
+            e.printStackTrace();
+        }
         return null;
     }
 

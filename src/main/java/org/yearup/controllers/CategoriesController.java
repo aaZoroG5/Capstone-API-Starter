@@ -16,7 +16,7 @@ import java.util.List;
     // http://localhost:8080/categories
 // add annotation to allow cross site origin requests
 @RestController //added a restController annotation
-@RequestMapping("/categories") //?
+@RequestMapping("/categories")
 @CrossOrigin //?
 public class CategoriesController {
 
@@ -81,8 +81,9 @@ public class CategoriesController {
     // add annotation to ensure that only an ADMIN can call this function
     @DeleteMapping("/{categoryId}")
     @PreAuthorize("ADMIN")
-    public void deleteCategory(@PathVariable int id)
+    public void deleteCategory(@PathVariable int categoryId)
     {
         // delete the category by id
+        categoryDao.delete(categoryId);
     }
 }

@@ -6,10 +6,7 @@ import org.yearup.data.CategoryDao;
 import org.yearup.models.Category;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,7 +70,8 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
                 WHERE
                     category_id = ?
                 """;
-        try(Connection connection = getConnection();
+        try(//establish connection and create a prepared statement
+            Connection connection = getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);)
         {
             statement.setInt(1,categoryId);
@@ -103,9 +101,38 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
 
     @Override
     public Category create(Category category)
-    {
-        // create a new category
-        return null;
+    {// create an insert query
+       String sql = """
+               INSERT INTO
+                    categories (name, description)
+               VALUES
+                    (?,?)
+               """;
+
+       try (//establish connection and create a prepared statement
+            Connection connection = getConnection();
+            //the second parameter gives me the values of any auto-generated columns
+            PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
+       {    //construct the  new category
+            statement.setString(1, category.getName());
+            statement.setString(2, category.getDescription());
+            statement.executeUpdate();
+            //this resultSet retrieves the generated category Id
+            try (ResultSet keys = statement.getGeneratedKeys())
+            {
+                if (keys.next())//moves cursor to first row and returns true if row exists
+                {
+                    category.setCategoryId(keys.getInt(1));//sets category id
+                }
+            }
+            return category;
+
+       }catch(SQLException e)
+       {
+           e.printStackTrace();
+           throw new RuntimeException("Error creating category", e);
+       }
+
     }
 
     @Override

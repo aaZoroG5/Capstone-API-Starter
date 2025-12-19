@@ -59,7 +59,7 @@ public class CategoriesController {
     // add annotation to call this method for a POST action
     // add annotation to ensure that only an ADMIN can call this function
     @PostMapping
-    @PreAuthorize("ADMIN")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public Category addCategory(@RequestBody Category category)
     {
         // insert the category
@@ -68,8 +68,8 @@ public class CategoriesController {
 
     // add annotation to call this method for a PUT (update) action - the url path must include the categoryId
     // add annotation to ensure that only an ADMIN can call this function
-    @PutMapping("/{categoryId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("{categoryId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void updateCategory(@PathVariable int categoryId, @RequestBody Category category)
     {
         // update the category by id
@@ -79,8 +79,8 @@ public class CategoriesController {
 
     // add annotation to call this method for a DELETE action - the url path must include the categoryId
     // add annotation to ensure that only an ADMIN can call this function
-    @DeleteMapping("/{categoryId}")
-    @PreAuthorize("ADMIN")
+    @DeleteMapping("{categoryId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteCategory(@PathVariable int categoryId)
     {
         // delete the category by id

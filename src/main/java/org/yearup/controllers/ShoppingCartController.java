@@ -65,10 +65,6 @@ public class ShoppingCartController
             String userName = principal.getName();
             //find database user by userId
             User user = userDao.getByUserName(userName);
-
-            //check if product exists
-            if (productDao.getById(productId) == null)
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Product not found");
             //call the addCart method
             shoppingCartDao.addToCart(productId, user.getId());
         }catch(Exception e){

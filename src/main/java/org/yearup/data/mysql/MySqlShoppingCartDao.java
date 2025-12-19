@@ -113,7 +113,7 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
         try(//create connection and preparedStatement
             Connection connection = getConnection();
             PreparedStatement statement = connection.prepareStatement(sql))
-        {
+        {//set userId and delete
             statement.setInt(1, userId);
             statement.executeUpdate();
 
@@ -124,6 +124,50 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
 
     @Override
     public void editCart(int productId, int userId, int quantity) {
+        String sql = """
+                UPDATE
+                    shopping_cart
+                SET
+                    quantity = ?
+                WHERE
+                    user_id = ? AND product_id = ?
+                """;
+        try(//create connection and preparedStatement
+            Connection connection = getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql))
+        {
+            statement.setInt(1, quantity);
+            statement.setInt(2, userId);
+            statement.setInt(3, productId);
 
+            statement.executeUpdate();
+
+            //check if quantity is 0, if it is, remove product form cart
+            if(quantity <= 0){
+                removeFromCart(userId, productId);
+                return;
+            }
+        }catch(SQLException e){
+            throw new RuntimeException("There was an error editing the cart" + e);
+        }
+    }
+
+    //helper method to edit cart and remove a single product
+    private void removeFromCart(int userId, int productId){
+        String sql = """
+                DELETE FROM
+                    shopping_cart
+                WHERE
+                    user_id = ? AND product_id = ?
+                """;
+        try(Connection connection = getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql))
+        {
+            statement.setInt(1, userId);
+            statement.setInt(2, productId);
+            statement.executeUpdate();
+        }catch(SQLException e){
+            throw new RuntimeException("There was an error removing this item" + e);
+        }
     }
 }
